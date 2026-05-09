@@ -1,17 +1,34 @@
 import React, { useState, useEffect } from 'react';
-import { Keyboard, RotateCcw, Play, CheckCircle2, Trophy } from 'lucide-react';
+import { Keyboard, RotateCcw, Play, CheckCircle2, Trophy, Quote, Code, BookOpen } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
-const LEVELS = [
-    "Success is the sum of small efforts repeated day in and day out.",
-    "The only way to do great work is to love what you do. If you haven't found it yet, keep looking.",
-    "Perfection is achieved, not when there is nothing more to add, but when there is nothing left to take away.",
-    "Your time is limited, so don't waste it living someone else's life. Don't be trapped by dogma."
-];
+const CATEGORIES = {
+    quotes: [
+        "Success is the sum of small efforts repeated day in and day out.",
+        "The only way to do great work is to love what you do. If you haven't found it yet, keep looking.",
+        "Perfection is achieved, not when there is nothing more to add, but when there is nothing left to take away.",
+        "Your time is limited, so don't waste it living someone else's life. Don't be trapped by dogma."
+    ],
+    python: [
+        "def hello_world():\n    print(\"Hello, World!\")",
+        "import math\n\ndef calculate_area(radius):\n    return math.pi * radius ** 2",
+        "for i in range(10):\n    if i % 2 == 0:\n        print(f\"{i} is even\")",
+        "try:\n    result = 10 / 0\nexcept ZeroDivisionError:\n    print(\"Cannot divide by zero\")"
+    ],
+    vocabulary: [
+        "Eloquent: fluent or persuasive in speaking or writing.",
+        "Ubiquitous: present, appearing, or found everywhere.",
+        "Ephemeral: lasting for a very short time.",
+        "Cacophony: a harsh, discordant mixture of sounds.",
+        "Serendipity: the occurrence and development of events by chance in a happy or beneficial way."
+    ]
+};
 
 const TypingModule = () => {
+    const [activeMode, setActiveMode] = useState('quotes');
     const [currentLevel, setCurrentLevel] = useState(0);
-    const targetText = LEVELS[currentLevel];
+    
+    const targetText = CATEGORIES[activeMode][currentLevel];
     
     const [input, setInput] = useState("");
     const [startTime, setStartTime] = useState(null);
@@ -41,7 +58,7 @@ const TypingModule = () => {
         if (status === 'typing' && input === targetText) {
             setStatus('finished');
         }
-    }, [input, status]);
+    }, [input, status, targetText, startTime]);
 
     const handleInput = (e) => {
         if (status !== 'typing' && status !== 'idle') return;
@@ -67,8 +84,15 @@ const TypingModule = () => {
         setStatus('idle');
     };
 
+    const handleModeSwitch = (mode) => {
+        if (mode === activeMode) return;
+        setActiveMode(mode);
+        setCurrentLevel(0);
+        reset();
+    };
+
     const nextLevel = () => {
-        if (currentLevel < LEVELS.length - 1) {
+        if (currentLevel < CATEGORIES[activeMode].length - 1) {
             setCurrentLevel(prev => prev + 1);
             reset();
         }
@@ -80,24 +104,40 @@ const TypingModule = () => {
 
     const finalScore = Math.round(wpm * (accuracy / 100));
 
+    const renderModeButton = (modeKey, label, IconComponent) => (
+        <button
+            onClick={() => handleModeSwitch(modeKey)}
+            className={`flex items-center gap-2 px-5 py-2.5 rounded-xl font-medium transition-all ${
+                activeMode === modeKey 
+                ? 'bg-accent text-white shadow-[0_0_15px_rgba(139,92,246,0.3)]' 
+                : 'bg-white/5 text-text-dim hover:bg-white/10 hover:text-white border border-white/5'
+            }`}
+        >
+            <IconComponent size={18} />
+            {label}
+        </button>
+    );
+
     return (
-        <div className="max-w-3xl mx-auto mt-10 p-8 glass-panel border border-white/10">
-            <div className="flex justify-between items-center mb-8">
-                <div className="flex items-center gap-3">
-                    <div className="p-3 bg-accent/20 rounded-2xl">
-                        <Keyboard className="text-accent" />
+        <div className="max-w-4xl mx-auto mt-10 p-8 glass-panel border border-white/10">
+            {/* Header */}
+            <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 mb-10">
+                <div className="flex items-center gap-4">
+                    <div className="p-4 bg-accent/20 rounded-2xl">
+                        <Keyboard className="text-accent" size={28} />
                     </div>
                     <div>
-                        <h2 className="text-2xl font-bold premium-gradient">Typing Practice</h2>
-                        <p className="text-text-dim text-sm">Level {currentLevel + 1} of {LEVELS.length}</p>
+                        <h2 className="text-3xl font-bold premium-gradient">Typing Practice</h2>
+                        <p className="text-text-dim mt-1">Level {currentLevel + 1} of {CATEGORIES[activeMode].length}</p>
                     </div>
                 </div>
                 
-                {status === 'typing' && (
-                    <button onClick={stopSession} className="px-4 py-2 bg-red-500/20 text-red-400 rounded-xl hover:bg-red-500/30 transition-all font-medium border border-red-500/20">
-                        Stop Session
-                    </button>
-                )}
+                {/* Mode Selector */}
+                <div className="flex items-center gap-3 bg-[#0a0a0c] p-1.5 rounded-2xl border border-white/10">
+                    {renderModeButton('quotes', 'Quotes', Quote)}
+                    {renderModeButton('python', 'Python', Code)}
+                    {renderModeButton('vocabulary', 'Vocab', BookOpen)}
+                </div>
             </div>
 
             <AnimatePresence mode="wait">
@@ -134,7 +174,7 @@ const TypingModule = () => {
                             <button onClick={reset} className="px-6 py-3 bg-white/5 hover:bg-white/10 text-white rounded-xl transition-all font-medium flex items-center gap-2">
                                 <RotateCcw size={18} /> Retry Level
                             </button>
-                            {(status === 'finished' && currentLevel < LEVELS.length - 1) && (
+                            {(status === 'finished' && currentLevel < CATEGORIES[activeMode].length - 1) && (
                                 <button onClick={nextLevel} className="px-6 py-3 bg-accent hover:bg-accent/80 text-white rounded-xl transition-all font-medium shadow-[0_0_20px_rgba(170,59,255,0.4)] flex items-center gap-2">
                                     Next Level <Play size={18} />
                                 </button>
@@ -148,7 +188,7 @@ const TypingModule = () => {
                         animate={{ opacity: 1 }}
                         exit={{ opacity: 0 }}
                     >
-                        <div className="bg-white/5 p-8 rounded-3xl mb-6 font-mono text-xl leading-relaxed select-none border border-white/5 relative overflow-hidden">
+                        <div className="bg-white/5 p-8 rounded-3xl mb-6 font-mono text-xl leading-relaxed select-none border border-white/5 relative overflow-hidden whitespace-pre-wrap">
                             {/* Focus blur overlay if idle */}
                             {status === 'idle' && (
                                 <div className="absolute inset-0 z-10 bg-[#0a0a0c]/40 backdrop-blur-sm flex items-center justify-center">
@@ -173,7 +213,8 @@ const TypingModule = () => {
                             value={input}
                             onChange={handleInput}
                             disabled={status !== 'idle' && status !== 'typing'}
-                            className="w-full h-32 bg-white/5 border border-white/10 rounded-2xl p-6 focus:outline-none focus:border-accent/50 transition-all text-white text-lg font-mono mb-6 resize-none shadow-inner"
+                            spellCheck="false"
+                            className="w-full h-40 bg-white/5 border border-white/10 rounded-2xl p-6 focus:outline-none focus:border-accent/50 transition-all text-white text-lg font-mono mb-6 resize-none shadow-inner whitespace-pre-wrap"
                             placeholder=""
                             autoFocus
                         />
@@ -189,9 +230,16 @@ const TypingModule = () => {
                                     <p className="text-2xl font-bold">{accuracy}%</p>
                                 </div>
                             </div>
-                            <button onClick={reset} className="p-3 bg-white/5 hover:bg-white/10 rounded-xl transition-all group" title="Restart">
-                                <RotateCcw size={20} className="text-text-dim group-hover:text-white transition-colors group-hover:-rotate-180 duration-500" />
-                            </button>
+                            <div className="flex gap-4">
+                                {status === 'typing' && (
+                                    <button onClick={stopSession} className="px-4 py-2 bg-red-500/10 text-red-400 hover:bg-red-500/20 rounded-xl transition-all font-medium border border-red-500/20 text-sm">
+                                        Stop
+                                    </button>
+                                )}
+                                <button onClick={reset} className="p-3 bg-white/5 hover:bg-white/10 rounded-xl transition-all group" title="Restart">
+                                    <RotateCcw size={20} className="text-text-dim group-hover:text-white transition-colors group-hover:-rotate-180 duration-500" />
+                                </button>
+                            </div>
                         </div>
                     </motion.div>
                 )}

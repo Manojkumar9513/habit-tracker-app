@@ -9,6 +9,7 @@ import TypingModule from './components/TypingModule';
 import SavingsTracker from './components/SavingsTracker';
 import AIModule from './components/AIModule';
 import EventsCalendar from './components/EventsCalendar';
+import DigitalBuddy from './components/DigitalBuddy';
 import { db } from './firebase';
 import { collection, onSnapshot } from 'firebase/firestore';
 
@@ -194,6 +195,7 @@ function App() {
             <Route path="/events" element={<EventsCalendar />} />
             <Route path="/typing" element={<TypingModule />} />
             <Route path="/ai" element={<AIModule />} />
+            <Route path="/buddy" element={<DigitalBuddy />} />
           </Routes>
         </main>
       </div>

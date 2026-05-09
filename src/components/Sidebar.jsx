@@ -1,5 +1,5 @@
 import React from 'react';
-import { LayoutDashboard, CheckCircle, Wallet, Keyboard, Mic, CalendarDays } from 'lucide-react';
+import { LayoutDashboard, CheckCircle, Wallet, Keyboard, Mic, CalendarDays, Bot } from 'lucide-react';
 import { NavLink } from 'react-router-dom';
 
 const Sidebar = () => {
@@ -10,6 +10,7 @@ const Sidebar = () => {
         { name: 'Events', path: '/events', icon: <CalendarDays size={20} /> },
         { name: 'Typing', path: '/typing', icon: <Keyboard size={20} /> },
         { name: 'AI Voice', path: '/ai', icon: <Mic size={20} /> },
+        { name: 'Buddy', path: '/buddy', icon: <Bot size={20} /> },
     ];
 
     return (
